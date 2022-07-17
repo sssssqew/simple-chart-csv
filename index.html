@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자바스크립트 연습</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="chart-container" style="width: 80%; height: 400px; margin: 100px auto">
+    <canvas id="myChart"></canvas>
+  </div>
+
+  <script>
+    chartIt()
+
+    async function chartIt(){
+      const {xs, ys} = await getData()
+      const ctx = document.getElementById('myChart').getContext('2d');
+      const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: xs,
+            datasets: [{
+                label: 'Global Average Temperature',
+                data: ys,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+        scales: {
+              y: {
+                  ticks: {
+                      callback: function(value, index, ticks) { // y축 라벨 포맷 커스터마이징
+                          return value + '°';
+                      }
+                  }
+              }
+          }
+        }
+      });
+    }
+    
+    async function getData(){
+      const xs = []
+      const ys = []
+      const response = await fetch('ZonAnn.Ts+dSST.csv') // csv 파일 로딩
+      const data = await response.text() // text 형식으로 변환
+
+      const table = data.split('\n').slice(1)
+      table.forEach(row => {
+        const cols = row.split(',')
+        const year = cols[0]
+        const temp = cols[1]
+        console.log(year, temp)
+        xs.push(year)
+        ys.push(parseFloat(temp) + 14)
+      })
+      return {xs, ys}
+    }
+  </script>
+  <script src='app.js'></script>
+</body>
+</html>
